@@ -1,8 +1,7 @@
-import React from 'react';
-//import './style/Message.css';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import './style/Message.css';
 import useAxios from '../utils/useAxios';
-import { jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 import { Link, useParams, useHistory } from 'react-router-dom/';
 import moment from 'moment';
 
@@ -13,8 +12,8 @@ function MessageDetail() {
   const [message, setMessage] = useState([]);
   const [user, setUser] = useState([]);
   const [profile, setProfile] = useState([]);
-  const [newMessage, setNewMessage] = useState({ message: "" }); // Changed variable name to setNewMessage
-  const [newSearch, setNewSearch] = useState({ search: "" }); // Changed variable name to setNewSearch
+  const [newMessage, setNewMessage] = useState({ message: '' });
+  const [newSearch, setNewSearch] = useState({ search: '' });
 
   const axios = useAxios();
   const id = useParams();
@@ -66,30 +65,30 @@ function MessageDetail() {
     fetchProfile();
   }, []);
 
-  // capture changes made by the user in those fields and update the component's state accordingly.
+
   const handleChange = (event) => {
+
     setNewMessage({
       ...newMessage,
       [event.target.name]: event.target.value,
     });
   };
 
-  // Send Message
-  const sendMessage = () => { // Changed function name to camelCase
+  const SendMessage = () => {
     const formdata = new FormData();
-    formdata.append("user", user_id);
-    formdata.append("sender", user_id);
-    formdata.append("reciever", id.id);
-    formdata.append("message", newMessage.message);
-    formdata.append("is_read", false);
+    formdata.append('user', user_id);
+    formdata.append('sender', user_id);
+    formdata.append('reciever', id.id);
+    formdata.append('message', newMessage.message);
+    formdata.append('is_read', false);
 
     try {
       axios.post(baseURL + '/send-messages/', formdata).then((res) => {
-        document.getElementById("text-input").value = "";
-        setNewMessage({ message: "" }); // Corrected state update
+        document.getElementById('text-input').value = '';
+        setNewMessage({ message: '' });
       });
     } catch (error) {
-      console.log("error ===", error);
+      console.log('error ===', error);
     }
   };
 
@@ -100,32 +99,33 @@ function MessageDetail() {
     });
   };
 
-  console.log(newSearch.username);
-
-  const searchUser = () => { // Changed function name to camelCase
-    axios.get(baseURL + '/search/' + newSearch.username + '/')
+  const SearchUser = () => {
+    axios
+      .get(baseURL + '/search/' + newSearch.username + '/')
       .then((res) => {
         if (res.status === 404) {
           console.log(res.data.detail);
-          alert("User does not exist");
+          alert('User does not exist');
         } else {
           history.push('/search/' + newSearch.username + '/');
         }
       })
       .catch((error) => {
-        alert("User Does Not Exist");
+        alert('User Does Not Exist');
       });
   };
 
 
   const handleLogout = () => {
+    // Perform logout actions, such as clearing local storage, redirecting, etc.
     localStorage.removeItem('authTokens');
+    // Redirect to the login page or any other desired route after logout
     history.push('/login');
   };
 
   return (
     <div>
-      <main className="content" style={{ marginTop: "150px" }}>
+      <main className="content" style={{ marginTop: '150px' }}>
         <div className="container p-0">
           <h1 className="h3 mb-3">Messages</h1>
           <div className="card">
@@ -139,44 +139,68 @@ function MessageDetail() {
                         className="form-control my-3"
                         placeholder="Search..."
                         onChange={handleSearchChange}
-                        name='username'
-
+                        name="username"
                       />
-                      <button className='ml-2' onClick={searchUser} style={{ border: "none", borderRadius: "50%" }}><i className='fas fa-search'></i></button>
+                      <button
+                        className="ml-2"
+                        onClick={SearchUser}
+                        style={{ border: 'none', borderRadius: '50%' }}
+                      >
+                        <i className="fas fa-search"></i>
+                      </button>
                     </div>
                   </div>
                 </div>
-                {messages.map((message) =>
+                {messages.map((message) => (
                   <Link
-                    to={"/inbox-message/" + (message.sender.id === user_id ? message.reciever.id : message.sender.id) + "/"}
+                    to={
+                      '/inbox-message/' +
+                      (message.sender.id === user_id
+                        ? message.reciever.id
+                        : message.sender.id) +
+                      '/'
+                    }
                     href="#"
                     className="list-group-item list-group-item-action border-0"
-                    key={message.id} // Added key prop
+                    key={message.id}
                   >
-                    <small><div className="badge bg-success float-right text-white">{moment.utc(message.date).local().startOf('seconds').fromNow()}</div></small>
+                    <small>
+                      <div className="badge bg-success float-right text-white">
+                        {moment.utc(message.date).local().startOf('seconds').fromNow()}
+                      </div>
+                    </small>
                     <div className="d-flex align-items-start">
-                      {message.sender.id !== user_id &&
-                        <img src={message.sender_profile.image} className="rounded-circle mr-1" alt="1" width={40} height={40} />
-                      }
-                      {message.sender.id === user_id &&
-                        <img src={message.reciever_profile.image} className="rounded-circle mr-1" alt="2" width={40} height={40} />
-                      }
+                      {message.sender.id !== user_id && (
+                        <img
+                          src={message.sender_profile.image}
+                          className="rounded-circle mr-1"
+                          alt="1"
+                          width={40}
+                          height={40}
+                        />
+                      )}
+                      {message.sender.id === user_id && (
+                        <img
+                          src={message.reciever_profile.image}
+                          className="rounded-circle mr-1"
+                          alt="2"
+                          width={40}
+                          height={40}
+                        />
+                      )}
                       <div className="flex-grow-1 ml-3">
                         {message.sender.id === user_id &&
-                          (message.reciever_profile.full_name !== null ? message.reciever_profile.full_name : message.reciever.username)
-                        }
-
-                        {message.sender.id !== user_id &&
-                          (message.sender.username)
-                        }
+                          (message.reciever_profile.full_name !== null
+                            ? message.reciever_profile.full_name
+                            : message.reciever.username)}
+                        {message.sender.id !== user_id && message.sender.username}
                         <div className="small">
                           <small>{message.message}</small>
                         </div>
                       </div>
                     </div>
                   </Link>
-                )}
-
+                ))}
                 <hr className="d-block d-lg-none mt-1 mb-0" />
               </div>
               <div className="col-12 col-lg-7 col-xl-9">
@@ -186,7 +210,7 @@ function MessageDetail() {
                       <img
                         src={profile.image}
                         className="rounded-circle mr-1"
-                        alt=""
+                        alt="Sharon Lessman"
                         width={40}
                         height={40}
                       />
@@ -198,7 +222,7 @@ function MessageDetail() {
                       </div>
                     </div>
                     <div>
-                      <button onClick={handleLogout} className="btn btn-danger btn-lg mr-1 px-3">
+                      <button className="btn btn-light border btn-lg px-3" onClick={handleLogout}>
                         Logout
                       </button>
                     </div>
@@ -206,40 +230,55 @@ function MessageDetail() {
                 </div>
                 <div className="position-relative">
                   <div className="chat-messages p-4">
-                    {message.map((msg, index) =>
+                    {message.map((message, index) => (
                       <>
-                        {msg.sender.id !== user_id &&
+                        {message.sender.id !== user_id && (
                           <div className="chat-message-left pb-4" key={index}>
                             <div>
-                              <img src={msg.sender_profile.image} className="rounded-circle mr-1" alt="Chris Wood" style={{ objectFit: "cover" }} width={40} height={40} />
-                              <div className="text-muted small text-nowrap mt-2">
-                              </div>
+                              <img
+                                src={message.sender_profile.image}
+                                className="rounded-circle mr-1"
+                                alt="Chris Wood"
+                                style={{ objectFit: 'cover' }}
+                                width={40}
+                                height={40}
+                              />
+                              <div className="text-muted small text-nowrap mt-2"></div>
                             </div>
                             <div className="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
                               <div className="font-weight-bold mb-1">You</div>
-                              {msg.message}
+                              {message.message}
                               <br />
-                              <span className='mt-3'>{moment.utc(msg.date).local().startOf('seconds').fromNow()}</span>
+                              <span className="mt-3">
+                                {moment.utc(message.date).local().startOf('seconds').fromNow()}
+                              </span>
                             </div>
                           </div>
-                        }
-                        {msg.sender.id === user_id &&
+                        )}
+                        {message.sender.id === user_id && (
                           <div className="chat-message-right pb-4" key={index}>
                             <div>
-                              <img src={msg.sender_profile.image} className="rounded-circle mr-1" alt="{msg.reciever_profile.full_name}" style={{ objectFit: "cover" }} width={40} height={40} />
+                              <img
+                                src={message.sender_profile.image}
+                                className="rounded-circle mr-1"
+                                alt="{message.reciever_profile.full_name}"
+                                style={{ objectFit: 'cover' }}
+                                width={40}
+                                height={40}
+                              />
                               <br />
-                              <div className="text-muted small text-nowrap mt-2">{moment.utc(msg.date).local().startOf('seconds').fromNow()}</div>
+                              <div className="text-muted small text-nowrap mt-2">
+                                {moment.utc(message.date).local().startOf('seconds').fromNow()}
+                              </div>
                             </div>
                             <div className="flex-shrink-1 bg-light rounded py-2 px-3 ml-3">
-                              <div className="font-weight-bold mb-1">{msg.reciever_profile.full_name}</div>
-                              {msg.message}
+                              <div className="font-weight-bold mb-1">{message.reciever_profile.full_name}</div>
+                              {message.message}
                             </div>
                           </div>
-                        }
-
+                        )}
                       </>
-                    )}
-
+                    ))}
                   </div>
                 </div>
                 <div className="flex-grow-0 py-3 px-4 border-top">
@@ -250,10 +289,12 @@ function MessageDetail() {
                       placeholder="Type your message"
                       value={newMessage.message}
                       name="message"
-                      id='text-input'
+                      id="text-input"
                       onChange={handleChange}
                     />
-                    <button onClick={sendMessage} className="btn btn-primary">Send</button>
+                    <button onClick={SendMessage} className="btn btn-primary">
+                      Send
+                    </button>
                   </div>
                 </div>
               </div>
@@ -262,7 +303,7 @@ function MessageDetail() {
         </div>
       </main>
     </div>
-  )
+  );
 }
 
 export default MessageDetail;
